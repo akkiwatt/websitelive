@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<script src="http://code.jquery.com/jquery-1.6.3.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<input type="button" id="btnPieChart" value="Pie Chart" />
+
+<script type="text/JavaScript">
+$(document).ready(function () {    
+
+function getParameterByName(name, url)
+ {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+    var a = getParameterByName('a'); 
+    console.log(a);
+$('#btnPieChart').live('click', function(){ 
+ 
+	var data = new Array();
+	var data2 = new Array();
+	my_func();
+ function my_func()	{
+		
+	var allText =[];
+	var allTextLines = [];
+	var Lines = [];
+	var eachValue=[];
+	var splitValue= [];
+	var pieValue=[];
+	var temp1=[];
+	var incVal=0;
+	var temp1Inc=0;
+	var j=0
+	var txtFile = new XMLHttpRequest();
+
+	txtFile.open("GET", "excel_html_test.csv", true);
+	allText = txtFile.responseText;
+
+	txtFile.onreadystatechange = function()
+	{
+		if (txtFile.readyState == 4)
+		{
+					allText = txtFile.responseText;
+                    //change : /\r\n|\n/
+					allTextLines = allText.split(/\n/);
+//					allTextLines = allText.split(/\r\n|\n/);
+					for(var i=0;i<allTextLines.length;i++)	{
+
+//split location eachValue 0 has country name.
+//if eachValue[0] == "Selected Country" then add in array.
+						//console.log(allTextLines[i]);
+						eachValue = allTextLines[i].split(",");
+						if(eachValue[0] == a || eachValue[0] == 'Coutry Name'){
+							splitValue[j]=eachValue[1];
+							splitValue[j+1]=eachValue[2];
+							console.log(eachValue[0] + "-----" + eachValue[1] + "-----" + eachValue[2]);
+                            j=j+2;
+						}
+						
+					}
+            console.log("=========================splitValue=========================");
+            console.log(splitValue);
+					var temp=0;
+					var flag=0;
+
+					for(var m=2;m<splitValue.length;m++)	{
+						temp=splitValue[m+1];
+						for(var l=m+1;l<splitValue.length;l++)	{
+							if(splitValue[m]==splitValue[l])	{
+//                                alert("out");
+								for(var n=0;n<pieValue.length;n++){
+									if(splitValue[m]==pieValue[n])	{
+										alert("flag");
+                                        flag=1;
+										break;
+									}
+										
+								}
+							}
+									
+                            console.log("pieValue");
+                            console.log(pieValue);
+                            
+							if(flag==0 && splitValue[m]==splitValue[l])	{
+//                                alert();
+								pieValue[incVal]=splitValue[m];
+								temp=parseInt(temp)+parseInt(splitValue[l+1]);
+								pieValue[incVal+1]=temp;
+							}
+							else if(flag==1 && splitValue[m]==splitValue[l]){
+								
+									temp=parseInt(temp)+parseInt(splitValue[l+1]);
+									if(pieValue[incVal]!=null)	{
+										pieValue[incVal+1]=temp;
+									}
+									
+							}
+								
+						}
+						
+						incVal=incVal+2;
+						
+						m++;
+						flag=0;
+						temp=0;
+					}
+					
+					for(var k=0;k<pieValue.length;k++)	{
+						pushData(new Array(pieValue[k],parseInt(pieValue[k+1])));    
+						k++;
+
+                    }
+            console.log("splitValue");
+            console.log(splitValue);
+					for(var k=2;k<splitValue.length;k++)	{
+                        pushData2(new Array(splitValue[k],parseInt(splitValue[k+1])))
+						k++;
+					}
+                    console.log("new data")
+                    console.log(data2);
+                    console.log("data");
+                    console.log(data);
+//					RenderPieChart('container', data);
+					RenderPieChart('container', data2);
+					
+				} else { //alert("Didn't work"); 
+				}
+	}
+
+	txtFile.send(null)
+	}
+
+	function pushData(ary)	{
+		data.push(ary);
+	}
+	function pushData2(ary)	{
+		data2.push(ary);
+	}
+
+});
+
+    function RenderPieChart(elementId, dataList) {
+        new Highcharts.Chart({
+            chart: {
+                renderTo: elementId,
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            }, title: {
+                text: 'Pie Chart'
+            },
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.point.name + '</b>: ' + this.percentage + ' %';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function () {
+                            return '<b>' + this.point.name + '</b>: ' + this.percentage + ' %';
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Browser share',
+                data: dataList
+            }]
+        });
+    };
+});  
+       
+     </script>
+</body>
+</html>
